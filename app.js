@@ -140,7 +140,7 @@ function handle(msg) {
               }
             } else if (msg.text.includes('/banme')) {
               if (!isPrivateChat) {
-                bot.kickChatMember(msg.chat.id, msg.from.id, {
+                bot.banChatMember(msg.chat.id, msg.from.id, {
                   until_date: Math.floor(Date.now() / 1000) + 60,
                 });
               }
@@ -176,7 +176,7 @@ function handle(msg) {
                   } else if (msg.text.includes('filterNewcomers')) {
                     bot.sendMessage(chat.id, 'Please, use @shieldy_bot instead.');
                   } else if (msg.text.includes('/banme')) {
-                    bot.kickChatMember(msg.chat.id, msg.from.id, {
+                    bot.banChatMember(msg.chat.id, msg.from.id, {
                       until_date: Math.floor(Date.now() / 1000) + 60,
                     });
                   } else if (msg.text.includes('/votekickWord')) {

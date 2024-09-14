@@ -270,7 +270,9 @@ async function finishRequest(bot, request) {
   }\n${promoAddition}`
 
   if (!saved) {
-    bot.kickChatMember(request.chat.id, request.candidate.id)
+    bot.banChatMember(request.chat.id, request.candidate.id, {
+      revoke_messages: true,
+    })
     if (request.reply_chat_id && request.reply_message_id) {
       bot.deleteMessage(request.reply_chat_id, request.reply_message_id)
     }
