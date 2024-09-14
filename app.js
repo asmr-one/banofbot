@@ -61,6 +61,19 @@ function handle(msg) {
     return;
   }
 
+  db.logChatMessage(msg)
+      .then(() => {
+        console.log('log message success', msg.message_id, msg.chat.id, msg.from.id, msg.text);
+      })
+      .catch(err => console.error(err));
+
+  // 检查需要清理的 message
+  db.clearExpiredMessage()
+      .then(({deletedCount}) => {
+        console.log(`Cleared ${deletedCount} expired messages`);
+      })
+      .catch(err => console.error(err));
+
   // 如果消息包含 '@' 且不包含 'vote_to_kick_chn_bot'，则返回，不处理该消息
   if (msg.text && msg.text.includes('@') && !msg.text.includes('vote_to_kick_chn_bot')) {
     return;

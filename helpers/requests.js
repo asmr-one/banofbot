@@ -273,9 +273,20 @@ async function finishRequest(bot, request) {
     bot.banChatMember(request.chat.id, request.candidate.id, {
       revoke_messages: true,
     })
+
     if (request.reply_chat_id && request.reply_message_id) {
       bot.deleteMessage(request.reply_chat_id, request.reply_message_id)
     }
+
+    db.findChatMessages(request.chat.id, request.candidate.id)
+        .then((msgs) => {
+          return bot.deleteMessages(request.chat.id, msgs)
+        })
+        .catch((err) => {
+          console.error('findChatMessages failed')
+          console.error(err)
+        })
+
     try {
       request.chat.last_ban = new Date()
       await request.chat.save()

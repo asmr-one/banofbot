@@ -8,7 +8,9 @@ const {
   Chat,
   User,
   Request,
+  Message
 } = require('../models');
+
 
 /**
  * Function to get chat, creates if none exists yet
@@ -63,6 +65,25 @@ function createRequest(request) {
   return req.save();
 }
 
+function logChatMessage(msg) {
+  return Message.create({
+    chat_id: msg.chat.id,
+    user_id: msg.from.id,
+    message_id: msg.message_id
+  });
+}
+
+function findChatMessages(chatId, userId) {
+  // return message_id list only
+  return Message.find({ chat_id: chatId, user_id: userId }).select('message_id');
+}
+
+function clearExpiredMessage() {
+  // 48 hrs
+  return Message.deleteMany({ updatedAt: { $lt: new Date(Date.now() - 48 * 60 * 60 * 1000) } });
+}
+
+
 /** Exports */
 module.exports = {
   findChat,
@@ -70,4 +91,7 @@ module.exports = {
   findRequest,
   createRequest,
   findChatsWithNewcomers,
+  logChatMessage,
+  findChatMessages,
+  clearExpiredMessage
 };
