@@ -1,0 +1,28 @@
+version: "3"
+services:
+  mongo:
+    image: mongo
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - ./mongo_data:/data/db
+    command: >
+      mongod
+      --wiredTigerJournalCompressor zstd
+      --wiredTigerCollectionBlockCompressor zstd
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "127.0.0.1/test",
+          "--eval",
+          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5

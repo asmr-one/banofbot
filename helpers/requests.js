@@ -51,7 +51,7 @@ async function startRequest(bot, msg) {
     return
   }
 
-  if (candidate.username === 'banofbot') {
+  if (candidate.username === 'vote_to_kick_chn_bot') {
     return
   }
 

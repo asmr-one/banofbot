@@ -47,15 +47,7 @@ mongoose.connection.on('disconnected', () => {
 mongoose.set('useCreateIndex', true)
 mongoose.set('useFindAndModify', false)
 
-let timeoutOver = false
-setTimeout(() => {
-  timeoutOver = true
-}, 5000)
-
 bot.on('message', (msg) => {
-  if (!timeoutOver) {
-    return
-  }
   handle(msg)
 })
 
@@ -64,146 +56,149 @@ bot.on('message', (msg) => {
  * @param {Telegram:Message} msg Message received
  */
 function handle(msg) {
+  // 如果消息为空，直接返回
   if (!msg) {
-    return
+    return;
   }
-  if (msg.text && msg.text.includes('@') && !msg.text.includes('banofbot')) {
-    return
+
+  // 如果消息包含 '@' 且不包含 'vote_to_kick_chn_bot'，则返回，不处理该消息
+  if (msg.text && msg.text.includes('@') && !msg.text.includes('vote_to_kick_chn_bot')) {
+    return;
   }
-  const isPrivateChat =
-    msg.chat.type === 'private' || msg.chat.type === 'channel'
+
+  // 判断消息是否为私聊或频道类型
+  const isPrivateChat = msg.chat.type === 'private' || msg.chat.type === 'channel';
+
+  // 判断消息是否为命令（即 / 开头的指令）
   const isCommand =
-    msg.text &&
-    msg.entities &&
-    msg.entities[0] &&
-    msg.entities[0].type === 'bot_command'
+      msg.text &&
+      msg.entities &&
+      msg.entities[0] &&
+      msg.entities[0].type === 'bot_command';
+
+  // 判断是否为新用户进入或群聊创建事件
   const isEntry =
-    (msg.new_chat_participant &&
-      msg.new_chat_participant.username &&
-      msg.new_chat_participant.username === 'banofbot') ||
-    msg.group_chat_created
+      (msg.new_chat_participant &&
+          msg.new_chat_participant.username &&
+          msg.new_chat_participant.username === 'vote_to_kick_chn_bot') ||
+      msg.group_chat_created;
+
+  // 在数据库中查找当前聊天记录
   db.findChat(msg.chat)
-    .then((chat) => {
-      let isReply =
-        msg.reply_to_message &&
-        msg.text &&
-        (msg.text.includes('banofbot') ||
-          msg.text.includes('@ban') ||
-          msg.text.includes('voteban') ||
-          msg.text.includes('Voteban') ||
-          msg.text.includes('/spam') ||
-          (chat.votekickWord &&
-            chat.votekickWord.split(', ').reduce((p, c) => {
-              return (
-                p ||
-                new RegExp(
-                  `(?<=[\\s,.:;"']|^)${c}(?=[\\s,.:;"']|$)`,
-                  'gum'
-                ).test(msg.text)
-              )
-            }, false)))
-      if (
-        msg.reply_to_message &&
-        msg.sticker &&
-        msg.sticker.file_id === 'CAADAQADyQIAAgdEiQTkPSm3CRyNIQI'
-      ) {
-        isReply = true
-      }
-      if (isCommand) {
-        if (isPrivateChat || !chat.admin_locked) {
-          if (msg.text.includes('start')) {
-            language.sendLanguage(bot, chat, false)
-          } else if (msg.text.includes('help')) {
-            help.sendHelp(bot, chat)
-          } else if (msg.text.includes('language')) {
-            language.sendLanguage(bot, chat, true)
-          } else if (msg.text.includes('limit')) {
-            if (!isPrivateChat) {
-              limit.sendLimit(bot, chat, msg.text)
-            }
-          } else if (msg.text.includes('time')) {
-            if (!isPrivateChat) {
-              time.sendTime(bot, chat)
-            }
-          } else if (msg.text.includes('lock')) {
-            if (!isPrivateChat) {
-              lock.toggle(bot, chat)
-            }
-          } else if (msg.text.includes('filterNewcomers')) {
-            if (!isPrivateChat) {
-              bot.sendMessage(chat.id, 'Please, use @shieldy_bot instead.')
-            }
-          } else if (msg.text.includes('/banme')) {
-            if (!isPrivateChat) {
-              bot.kickChatMember(msg.chat.id, msg.from.id, {
-                until_date: Math.floor(Date.now() / 1000) + 60,
-              })
-            }
-          } else if (msg.text.includes('/votekickWord')) {
-            if (!isPrivateChat) {
-              votekickWord.check(bot, chat, msg.text)
-            }
-          }
-        } else {
-          admins
-            .isAdmin(bot, chat.id, msg.from.id)
-            .then((isAdmin) => {
-              if (msg.text.includes('start')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                language.sendLanguage(bot, chat, false)
-              } else if (msg.text.includes('help')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                help.sendHelp(bot, chat)
-              } else if (msg.text.includes('language')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                language.sendLanguage(bot, chat, true)
-              } else if (msg.text.includes('limit')) {
-                if (!isPrivateChat) {
-                  if (!isAdmin)
-                    return deleteMessage(msg.chat.id, msg.message_id)
-                  limit.sendLimit(bot, chat, msg.text)
-                }
-              } else if (msg.text.includes('time')) {
-                if (!isPrivateChat) {
-                  if (!isAdmin)
-                    return deleteMessage(msg.chat.id, msg.message_id)
-                  time.sendTime(bot, chat)
-                }
-              } else if (msg.text.includes('lock')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                if (!isPrivateChat) {
-                  lock.toggle(bot, chat)
-                }
-              } else if (msg.text.includes('filterNewcomers')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                bot.sendMessage(chat.id, 'Please, use @shieldy_bot instead.')
-              } else if (msg.text.includes('/banme')) {
-                if (!isPrivateChat) {
-                  bot.kickChatMember(msg.chat.id, msg.from.id, {
-                    until_date: Math.floor(Date.now() / 1000) + 60,
-                  })
-                }
-              } else if (msg.text.includes('/votekickWord')) {
-                if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id)
-                if (!isPrivateChat) {
-                  votekickWord.check(bot, chat, msg.text)
-                }
+      .then((chat) => {
+        // 判断是否是回复消息且包含特定关键字
+        let isReply =
+            msg.reply_to_message &&
+            msg.text &&
+            (msg.text.includes('vote_to_kick_chn_bot') ||
+                msg.text.includes('@ban') ||
+                msg.text.includes('voteban') ||
+                msg.text.includes('Voteban') ||
+                msg.text.includes('/spam') ||
+                (chat.votekickWord &&
+                    chat.votekickWord.split(', ').reduce((p, c) => {
+                      return (
+                          p ||
+                          new RegExp(`(?<=[\\s,.:;"']|^)${c}(?=[\\s,.:;"']|$)`, 'gum').test(msg.text)
+                      );
+                    }, false)));
+
+        // 如果消息为指定的贴纸（file_id 匹配），则视为回复
+        if (
+            msg.reply_to_message &&
+            msg.sticker &&
+            msg.sticker.file_id === 'CAADAQADyQIAAgdEiQTkPSm3CRyNIQI'
+        ) {
+          isReply = true;
+        }
+
+        // 处理命令
+        if (isCommand) {
+          // 如果是私聊或者聊天未被管理员锁定，则处理以下命令
+          if (isPrivateChat || !chat.admin_locked) {
+            if (msg.text.includes('start')) {
+              language.sendLanguage(bot, chat, false);
+            } else if (msg.text.includes('help')) {
+              help.sendHelp(bot, chat);
+            } else if (msg.text.includes('language')) {
+              language.sendLanguage(bot, chat, true);
+            } else if (msg.text.includes('limit')) {
+              if (!isPrivateChat) {
+                limit.sendLimit(bot, chat, msg.text);
               }
-            })
-            .catch(/** todo: handle error */)
+            } else if (msg.text.includes('time')) {
+              if (!isPrivateChat) {
+                time.sendTime(bot, chat);
+              }
+            } else if (msg.text.includes('lock')) {
+              if (!isPrivateChat) {
+                lock.toggle(bot, chat);
+              }
+            } else if (msg.text.includes('filterNewcomers')) {
+              if (!isPrivateChat) {
+                bot.sendMessage(chat.id, 'Please, use @shieldy_bot instead.');
+              }
+            } else if (msg.text.includes('/banme')) {
+              if (!isPrivateChat) {
+                bot.kickChatMember(msg.chat.id, msg.from.id, {
+                  until_date: Math.floor(Date.now() / 1000) + 60,
+                });
+              }
+            } else if (msg.text.includes('/votekickWord')) {
+              if (!isPrivateChat) {
+                votekickWord.check(bot, chat, msg.text);
+              }
+            }
+          } else {
+            // 如果聊天被管理员锁定，则只有管理员能执行命令
+            admins
+                .isAdmin(bot, chat.id, msg.from.id)
+                .then((isAdmin) => {
+                  if (!isAdmin) return deleteMessage(msg.chat.id, msg.message_id); // 非管理员消息删除
+
+                  // 处理管理员命令
+                  if (msg.text.includes('start')) {
+                    language.sendLanguage(bot, chat, false);
+                  } else if (msg.text.includes('help')) {
+                    help.sendHelp(bot, chat);
+                  } else if (msg.text.includes('language')) {
+                    language.sendLanguage(bot, chat, true);
+                  } else if (msg.text.includes('limit')) {
+                    if (!isPrivateChat) {
+                      limit.sendLimit(bot, chat, msg.text);
+                    }
+                  } else if (msg.text.includes('time')) {
+                    if (!isPrivateChat) {
+                      time.sendTime(bot, chat);
+                    }
+                  } else if (msg.text.includes('lock')) {
+                    lock.toggle(bot, chat);
+                  } else if (msg.text.includes('filterNewcomers')) {
+                    bot.sendMessage(chat.id, 'Please, use @shieldy_bot instead.');
+                  } else if (msg.text.includes('/banme')) {
+                    bot.kickChatMember(msg.chat.id, msg.from.id, {
+                      until_date: Math.floor(Date.now() / 1000) + 60,
+                    });
+                  } else if (msg.text.includes('/votekickWord')) {
+                    votekickWord.check(bot, chat, msg.text);
+                  }
+                })
+                .catch(/** todo: handle error */); // 处理错误（未实现）
+          }
+        } else if (isEntry) {
+          // 如果是新用户进入事件，发送语言选择
+          language.sendLanguage(bot, chat, false);
+        } else if (isReply) {
+          // 如果是投票踢人请求，启动请求处理
+          try {
+            requests.startRequest(bot, msg);
+          } catch (err) {
+            console.error(err);
+            // 忽略错误
+          }
         }
-      } else if (isEntry) {
-        language.sendLanguage(bot, chat, false)
-      } else if (isReply) {
-        try {
-          requests.startRequest(bot, msg)
-        } catch (err) {
-          console.error(err)
-          // Do nothing
-        }
-      }
-    })
-    .catch(/** todo: handle error */)
+      })
+      .catch(/** todo: handle error */); // 处理数据库查找错误（未实现）
 }
 
 bot.on('callback_query', (msg) => {

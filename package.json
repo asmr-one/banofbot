@@ -6,7 +6,7 @@
   "private": true,
   "license": "MIT",
   "engines": {
-    "node": ">=6.4"
+    "node": ">=15.8"
   },
   "scripts": {
     "start": "node app.js",
@@ -19,9 +19,10 @@
     "botanio": "0.0.6",
     "dotenv": "^8.1.0",
     "easy-file-manager": "^0.1.3",
+    "eslint-plugin-node": "^11.1.0",
     "lodash": "^4.17.21",
     "mongoose": "^5.7.0",
-    "node-telegram-bot-api": "^0.30.0",
+    "node-telegram-bot-api": "^0.66.0",
     "nodemon": "^1.19.2",
     "semaphore-async-await": "^1.5.1"
   },
