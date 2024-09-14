@@ -14,12 +14,8 @@ const { isRuChat } = require('./isRuChat')
 const { isOver10000 } = require('./goldenBorodutchSubCount')
 
 const promoAdditions = {
-  ru: () =>
-    isOver10000()
-      ? '<a href="https://www.ua2canada.info">Информация по переезду из 🇺🇦 в 🇨🇦</a>'
-      : '<a href="https://www.ua2canada.info">Информация по переезду из 🇺🇦 в 🇨🇦</a>',
-  en: () =>
-    '<a href="https://www.ua2canada.info/">Info on moving from 🇺🇦 to 🇨🇦</a>',
+  ru: () => '',
+  en: () => '',
 }
 
 /**
