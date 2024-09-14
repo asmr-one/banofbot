@@ -101,16 +101,8 @@ function languageKeyboard(isCommand) {
  */
 function languages() {
   return {
-    Russian: 'ru',
     English: 'en',
-    Ukrainian: 'uk',
-    Uzbek: 'uz',
-    Kazakh: 'kz',
-    Português: 'pt',
-    Turkish: 'tr',
-    Azerbaijani: 'az',
-    German: 'de',
-    French: 'fr',
+    Chinese: 'zh',
   }
 }
 
