@@ -75,7 +75,8 @@ function logChatMessage(msg) {
 
 function findChatMessages(chatId, userId) {
   // return message_id list only
-  return Message.find({ chat_id: chatId, user_id: userId }).select('message_id');
+  return Message.find({ chat_id: chatId, user_id: userId }).select('message_id')
+      .then(messages => messages.map(m => m.message_id));
 }
 
 function clearExpiredMessage() {

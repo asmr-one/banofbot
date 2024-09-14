@@ -280,6 +280,7 @@ async function finishRequest(bot, request) {
 
     db.findChatMessages(request.chat.id, request.candidate.id)
         .then((msgs) => {
+          console.log('kick user findChatMessages', msgs)
           return bot.deleteMessages(request.chat.id, msgs)
         })
         .catch((err) => {
