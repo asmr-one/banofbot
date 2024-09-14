@@ -63,7 +63,13 @@ function handle(msg) {
 
   db.logChatMessage(msg)
       .then(() => {
-        console.log('log message success', msg.message_id, msg.chat.id, msg.from.id, msg.text);
+        // console.log('log message success', msg.message_id, msg.chat.id, msg.from.id, msg.text);
+        console.log('log message success', {
+          chat_id: msg.chat.id,
+          user_id: msg.from.id,
+          message_id: msg.message_id,
+          text: msg.text,
+        });
       })
       .catch(err => console.error(err));
 
