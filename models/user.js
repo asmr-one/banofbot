@@ -14,38 +14,36 @@ const userSchema = new Schema(
       type: Number,
       required: true,
     },
-    first_name: {
-      type: String,
-      required: true,
-    },
+    first_name: String,
     last_name: String,
     username: String,
   },
   { timestamps: true, usePushEach: true }
 )
 
-userSchema.methods.name = function name() {
-  if (this.username) {
-    return `@${this.username}`
-  } else if (this.last_name) {
-    return `${this.first_name} ${this.last_name}`
+userSchema.methods.name = function (user) {
+  if (!user) { user = this }
+
+  if (user.username) {
+    return `@${user.username}`
   }
-  return this.first_name
+  else if (user.first_name && user.last_name) {
+    return `${user.first_name} ${user.last_name}`
+  }
+  else if (user.first_name) {
+    return user.first_name
+  }
+  else {
+    return `UserID: ${user.id}`
+  }
+
 }
 
 userSchema.methods.realNameWithHTML = function(bot, chatId) {
   return bot.getChatMember(chatId, this.id).then(res => {
     const user = res.user
-    if (user.username) {
-      return `<a href="tg://user?id=${user.id}">@${user.username}</a>`
-    }
-    return `<a href="tg://user?id=${user.id}">${(user.first_name || 'User')
-      .replace('<', '')
-      .replace('>', '')}${
-      user.last_name
-        ? ` ${user.last_name.replace('<', '').replace('>', '')}`
-        : ''
-    }</a>`
+    const name = this.name(user)
+    return `<a href="tg://user?id=${user.id}">${name.replace('<', '')}</a>`
   })
 }
 
