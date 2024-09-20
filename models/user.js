@@ -43,7 +43,7 @@ userSchema.methods.realNameWithHTML = function(bot, chatId) {
   return bot.getChatMember(chatId, this.id).then(res => {
     const user = res.user
     const name = this.name(user)
-    return `<a href="tg://user?id=${user.id}">${name.replace('<', '')}</a>`
+    return `<a href="tg://user?id=${user.id}">${name.replace('<', '').replace('>', '')}</a>`
   })
 }
 
