@@ -54,6 +54,7 @@ async function startRequest(bot, msg) {
   const mockRequest = {
     reply_chat_id: msg.reply_to_message.chat.id,
     reply_message_id: msg.reply_to_message.message_id,
+    reply_message_content: msg.reply_to_message?.text ?? 'UNKNOWN',
     chat,
     candidate,
     starter,

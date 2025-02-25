@@ -14,6 +14,7 @@ const requestSchema = new Schema(
     inline_message_id: Number,
     reply_chat_id: Number,
     reply_message_id: Number,
+    reply_message_content: String,
     chat: {
       type: Schema.ObjectId,
       ref: 'chat',
