@@ -18,6 +18,8 @@ const promoAdditions = {
   en: () => '',
 }
 
+let lastRequestOfGroup = {}
+
 /**
  * Starts ban request
  * @param {Telegram:Bot} bot Bot that should respond
@@ -34,6 +36,12 @@ async function startRequest(bot, msg) {
   const requiredMilliseconds = chat.seconds_between_bans * 1000
   if (now - lastBan < requiredMilliseconds) {
     return sendBanLimitError(bot, chat)
+  }
+
+  if (lastRequestOfGroup[chat.id] && lastRequestOfGroup[chat.id] > now - requiredMilliseconds) {
+    return sendBanLimitError(bot, chat)
+  } else {
+    lastRequestOfGroup[chat.id] = now
   }
 
   const isBotAdmin = await admins.isBotAdmin(bot, chat.id)
