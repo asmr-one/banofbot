@@ -30,6 +30,12 @@ async function startRequest(bot, msg) {
   const starter = await db.findUser(msg.from)
   const candidate = await db.findUser(msg.reply_to_message.from)
 
+  // Check if starter can vote (24h cooldown)
+  const canVote = await db.canUserVote(starter.id)
+  if (!canVote) {
+    return sendBanLimitError(bot, chat)
+  }
+
   // Check if it can create new ban request
   const now = new Date().getTime()
   const lastBan = chat.last_ban.getTime()
@@ -128,6 +134,12 @@ async function voteQuery(bot, msg) {
       .findRequest(requestId)
       .populate('chat candidate starter voters_ban voters_noban')
     const voter = await db.findUser(msg.from)
+
+    // Check if voter can vote (24h cooldown) - silent failure for button clicks
+    const canVote = await db.canUserVote(msg.from.id)
+    if (!canVote) {
+      return bot.answerCallbackQuery(msg.id)
+    }
 
     const strings = require('./strings')()
 

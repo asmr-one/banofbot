@@ -17,6 +17,10 @@ const userSchema = new Schema(
     first_name: String,
     last_name: String,
     username: String,
+    last_vote_time: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true, usePushEach: true }
 )

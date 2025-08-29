@@ -84,6 +84,29 @@ function clearExpiredMessage() {
   return Message.deleteMany({ updatedAt: { $lt: new Date(Date.now() - 48 * 60 * 60 * 1000) } });
 }
 
+/**
+ * Check if user can vote (24h cooldown) and update last vote time if allowed
+ * @param {Number} userId User ID
+ * @return {Promise(Boolean)} True if user can vote, false otherwise
+ */
+function canUserVote(userId) {
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  return User.findOne({ id: userId })
+    .then((user) => {
+      if (!user) return false;
+
+      // Check if user voted within last 24 hours
+      if (user.last_vote_time && user.last_vote_time > twentyFourHoursAgo) {
+        return false;
+      }
+
+      // Update last vote time
+      user.last_vote_time = now;
+      return user.save().then(() => true);
+    });
+}
 
 /** Exports */
 module.exports = {
@@ -94,5 +117,6 @@ module.exports = {
   findChatsWithNewcomers,
   logChatMessage,
   findChatMessages,
-  clearExpiredMessage
+  clearExpiredMessage,
+  canUserVote
 };
