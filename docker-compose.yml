@@ -1,6 +1,15 @@
-version: "3"
+version: '3.5'
+
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "100M"
+    max-file: "10"
+
 services:
   mongo:
+    logging: *default-logging
     image: mongo
     restart: always
     expose:
