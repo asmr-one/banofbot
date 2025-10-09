@@ -91,14 +91,14 @@ function clearExpiredMessage() {
  */
 function canUserVote(userId) {
   const now = new Date();
-  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const voteCD = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
   return User.findOne({ id: userId })
     .then((user) => {
       if (!user) return false;
 
       // Check if user voted within last 24 hours
-      if (user.last_vote_time && user.last_vote_time > twentyFourHoursAgo) {
+      if (user.last_vote_time && user.last_vote_time > voteCD) {
         return false;
       }
 
